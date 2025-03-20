@@ -41,9 +41,28 @@ const App = () => {
     }
   };
 
+  const handleIncrementUser = async (userId) => {
+    try {
+      await axios.post("/api/user/increment", { id: userId });
+      fetchUsers(); // Refresh the users list
+    } catch (error) {
+      console.error("Error incrementing user:", error);
+    }
+  };
+
+  const handleDecrementUser = async (userId) => {
+    try {
+      await axios.post("/api/user/decrement", { id: userId });
+      fetchUsers(); // Refresh the users list
+    } catch (error) {
+      console.error("Error decrementing user:", error);
+    }
+  };
+
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-4">
-      <h1 className="text-3xl font-bold mb-4">User List</h1>
+      <h1 className="text-3xl font-bold mb-4">Corrosive Items</h1>
 
       {/* Input Field */}
       <div className="flex gap-2 mb-4">
@@ -52,13 +71,13 @@ const App = () => {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Enter user name"
+          placeholder="Enter item name"
         />
         <button 
           className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
           onClick={handleAddUser}
         >
-          Add User
+          Add Item
         </button>
       </div>
 
@@ -67,8 +86,9 @@ const App = () => {
         <p>Loading users...</p>
       ) : (
         <ul className="w-1/2 bg-gray-800 p-4 rounded-lg">
+        
           {users.length === 0 ? (
-            <p className="text-gray-400">No users found.</p>
+            <p className="text-gray-400">No items found.</p>
           ) : (
             users.map((user) => (
               <li 
@@ -76,15 +96,31 @@ const App = () => {
                 className="flex justify-between items-center p-2 border-b border-gray-600"
               >
                 <span>{user.name}</span>
-                <button
-                  className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded"
-                  onClick={() => handleDeleteUser(user.id)}
-                >
-                  Delete
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    className="bg-green-600 hover:bg-green-700 px-2 py-1 rounded"
+                    onClick={() => handleIncrementUser(user.id)}
+                  >
+                    +
+                  </button>
+                  <span>{user.Quantity}</span>
+                  <button
+                    className="bg-yellow-600 hover:bg-yellow-700 px-2 py-1 rounded"
+                    onClick={() => handleDecrementUser(user.id)}
+                  >
+                    -
+                  </button>
+                  <button
+                    className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded"
+                    onClick={() => handleDeleteUser(user.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
               </li>
             ))
           )}
+
         </ul>
       )}
     </div>

@@ -12,42 +12,90 @@ const dbPromise = open({
     driver: sqlite3.Database
 });
 
-// Ensure table creation
 (async () => {
     const db = await dbPromise;
-    await db.exec('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL);');
+    
+    // Create table if not exists (for new databases)
+    await db.exec('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, Quantity INTEGER DEFAULT 1);');
+    
+    // If the table already exists, check if the Quantity column is present.
+    const columns = await db.all("PRAGMA table_info(users)");
+    const quantityExists = columns.some(col => col.name === "Quantity");
+    if (!quantityExists) {
+        // Add the Quantity column to the existing table.
+        await db.exec('ALTER TABLE users ADD COLUMN Quantity INTEGER DEFAULT 1;');
+    }
+    
+    app.post("/api/user/create", async (req, res) => {
+        const { name } = req.body;
+        if (!name) {
+            return res.status(400).json({ error: "User name is required" });
+        }
+        try {
+            const user = await db.get('SELECT * FROM users WHERE name = ?', [name]);
+            if (user) {
+                await db.run('UPDATE users SET Quantity = Quantity + 1 WHERE id = ?', [user.id]);
+            } else {
+                await db.run('INSERT INTO users (name, Quantity) VALUES (?, ?)', [name, 1]);
+            }
+            res.status(201).json({ message: "User processed" });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+    app.post("/api/user/delete", async (req, res) => {
+        const { id } = req.body;
+        try {
+            await db.run('DELETE FROM users WHERE id = ?', [id]);
+            res.status(201).json({ message: "User deleted" });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+    // New endpoint to increment user's quantity
+    app.post("/api/user/increment", async (req, res) => {
+        const { id } = req.body;
+        if (!id) {
+            return res.status(400).json({ error: "User id is required" });
+        }
+        try {
+            await db.run('UPDATE users SET Quantity = Quantity + 1 WHERE id = ?', [id]);
+            res.status(200).json({ message: "User quantity incremented" });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+    // New endpoint to decrement user's quantity (won't decrement below 1)
+    app.post("/api/user/decrement", async (req, res) => {
+        const { id } = req.body;
+        if (!id) {
+            return res.status(400).json({ error: "User id is required" });
+        }
+        try {
+            await db.run(
+                `UPDATE users 
+                 SET Quantity = CASE 
+                                   WHEN Quantity > 1 THEN Quantity - 1 
+                                   ELSE 1 
+                                END 
+                 WHERE id = ?`, [id]);
+            res.status(200).json({ message: "User quantity decremented" });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+    app.get("/api/users", async (req, res) => {
+        try {
+            const users = await db.all('SELECT * FROM users');
+            res.json(users);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+    app.listen(3000, () => console.log("Server running on port 3000"));
 })();
-
-app.post("/api/user/create", async (req, res) => {
-    const { name } = req.body;
-    try {
-        const db = await dbPromise;
-        await db.run('INSERT INTO users (name) VALUES (?)', [name]);
-        res.status(201).json({ message: "User created" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.post("/api/user/delete", async (req, res) => {
-    const { id } = req.body;
-    try {
-        const db = await dbPromise;
-        await db.run('DELETE FROM users WHERE id=(?)', [id]);
-        res.status(201).json({ message: "User deleted" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.get("/api/users", async (req, res) => {
-    try {
-        const db = await dbPromise;
-        const users = await db.all('SELECT * FROM users');
-        res.json(users);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.listen(3000, () => console.log("Server running on port 3000"));

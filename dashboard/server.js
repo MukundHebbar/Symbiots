@@ -16,7 +16,7 @@ const dbPromise = open({
     const db = await dbPromise;
     
     // Create table if not exists (for new databases)
-    await db.exec('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, Quantity INTEGER DEFAULT 1);');
+    await db.exec('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, Quantity INTEGER DEFAULT 1, type TEXT NOT NULL , rfid INTEGER);');
     
     // If the table already exists, check if the Quantity column is present.
     const columns = await db.all("PRAGMA table_info(users)");
@@ -39,6 +39,34 @@ const dbPromise = open({
                 await db.run('INSERT INTO users (name, Quantity) VALUES (?, ?)', [name, 1]);
             }
             res.status(201).json({ message: "User processed" });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+ 
+    app.post("/api/corrosive/create", async (req, res) => {
+        const { name } = req.body;
+        if (!name) {
+            return res.status(400).json({ error: "Item name is required" });
+        }
+        try {
+            const item = await db.get('SELECT * FROM users WHERE name = ? AND type = ?', [name, 'corrosive']);
+            if (item) {
+                await db.run('UPDATE users SET Quantity = Quantity + 1 WHERE id = ?', [item.id]);
+            } else {
+                await db.run('INSERT INTO users (name, Quantity, type) VALUES (?, ?, ?)', [name, 1, 'corrosive']);
+            }
+            res.status(201).json({ message: "Corrosive item processed" });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+    
+    // New endpoint to fetch corrosive items only
+    app.get("/api/corrosive", async (req, res) => {
+        try {
+            const items = await db.all('SELECT * FROM users WHERE type = ?', ['corrosive']);
+            res.json(items);
         } catch (err) {
             res.status(500).json({ error: err.message });
         }

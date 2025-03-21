@@ -1,41 +1,42 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
-const corrosive = () => {
-  const [users, setUsers] = useState(null); // null for loading state
+import Header from "../assets/header";
+import '../App.css'
+const Corrosive = () => {
+  const [users, setUsers] = useState(null);
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
 
   const fetchUsers = () => {
-    axios.get("/api/corrosive")
-      .then((response) => {
-        setUsers(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching items:", error);
-        setLoading(false);
-      });
+    axios.get("/api/items/corrosive")
+        .then((response) => {
+            setUsers(response.data);
+            setLoading(false);
+        })
+        .catch((error) => {
+            console.error("Error fetching items:", error);
+            setLoading(false);
+        });
   };
 
   useEffect(fetchUsers, []); // Fetch items on mount
 
   const handleAddUser = async () => {
-    if (!name.trim()) return; // Prevent empty input
+    if (!name.trim()) return;
 
     try {
-      await axios.post("/api/corrosive/create", { name });
-      setName(""); // Clear input field
-      fetchUsers(); // Refetch items to update UI properly
+        await axios.post("/api/items/create/corrosive", { name });
+        setName("");
+        fetchUsers();
     } catch (error) {
-      console.error("Error adding item:", error);
+        console.error("Error adding item:", error);
     }
   };
 
   const handleDeleteUser = async (userId) => {
     try {
       await axios.post("/api/user/delete", { id: userId });
-      fetchUsers(); // Refetch items after deletion
+      fetchUsers();
     } catch (error) {
       console.error("Error deleting item:", error);
     }
@@ -44,7 +45,7 @@ const corrosive = () => {
   const handleIncrementUser = async (userId) => {
     try {
       await axios.post("/api/user/increment", { id: userId });
-      fetchUsers(); // Refresh the items list
+      fetchUsers();
     } catch (error) {
       console.error("Error incrementing item:", error);
     }
@@ -53,13 +54,14 @@ const corrosive = () => {
   const handleDecrementUser = async (userId) => {
     try {
       await axios.post("/api/user/decrement", { id: userId });
-      fetchUsers(); // Refresh the items list
+      fetchUsers();
     } catch (error) {
       console.error("Error decrementing item:", error);
     }
   };
 
-  return (
+  return ( 
+    <>  <Header/>
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-4">
       <h1 className="text-3xl font-bold mb-4">Corrosive Items</h1>
 
@@ -121,7 +123,7 @@ const corrosive = () => {
         </ul>
       )}
     </div>
-  );
+  </>);
 };
 
-export default corrosive;
+export default Corrosive;

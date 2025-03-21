@@ -1,1 +1,118 @@
 @import "tailwindcss";
+
+.app-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(17, 24, 39);
+    color: white;
+  }
+  
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    padding: 2rem;
+  }
+  
+  .category-card {
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+  }
+  
+  .category-card.flammable {
+    background-color: rgb(185, 28, 28);
+  }
+  
+  .category-card.toxic {
+    background-color: rgb(22, 163, 74);
+  }
+  
+  .category-card.corrosive {
+    background-color: rgb(202, 138, 4);
+  }
+  
+  .category-card.blank {
+    background-color: rgb(255, 255, 255);
+  }
+  
+  .category-card:hover {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+  }
+  
+  .category-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    color: white;
+    text-decoration: none;
+  }
+  
+  .blank-card {
+    cursor: default;
+  }
+  
+  .blank-card:hover {
+    transform: none;
+    filter: none;
+  }
+
+  /* ...existing app-container and grid styles... */
+
+/* Add these new header styles */
+.header-container {
+    width: 100%;
+    background-color: rgb(6, 182, 212);
+    padding: 1rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+  }
+  
+  .header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+  
+  .header-title {
+    width: 100%;
+    text-align: center;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .home-button {
+    position: absolute;
+    left: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: white;
+    color: rgb(6, 182, 212);
+    border-radius: 0.25rem;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.2s;
+  }
+  
+  .home-button:hover {
+    background-color: rgb(241, 245, 249);
+  }
+  
+  /* Update app-container to account for fixed header */
+  .app-container {
+    padding-top: 4rem;
+    /* ...keep existing app-container properties... */
+  }

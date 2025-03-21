@@ -26,6 +26,40 @@ const dbPromise = open({
         await db.exec('ALTER TABLE users ADD COLUMN Quantity INTEGER DEFAULT 1;');
     }
     
+   
+    
+    app.post("/api/items/create/:category", async (req, res) => {
+        const { name } = req.body;
+        const { category } = req.params;
+        
+        if (!name) {
+            return res.status(400).json({ error: "Item name is required" });
+        }
+        
+        try {
+            const item = await db.get('SELECT * FROM users WHERE name = ? AND type = ?', [name, category]);
+            if (item) {
+                await db.run('UPDATE users SET Quantity = Quantity + 1 WHERE id = ?', [item.id]);
+            } else {
+                await db.run('INSERT INTO users (name, Quantity, type) VALUES (?, ?, ?)', [name, 1, category]);
+            }
+            res.status(201).json({ message: `${category} item processed` });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+    
+    // Generic endpoint to fetch items by category
+    app.get("/api/items/:category", async (req, res) => {
+        const { category } = req.params;
+        try {
+            const items = await db.all('SELECT * FROM users WHERE type = ?', [category]);
+            res.json(items);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+   
     app.post("/api/user/create", async (req, res) => {
         const { name } = req.body;
         if (!name) {
@@ -36,7 +70,7 @@ const dbPromise = open({
             if (user) {
                 await db.run('UPDATE users SET Quantity = Quantity + 1 WHERE id = ?', [user.id]);
             } else {
-                await db.run('INSERT INTO users (name, Quantity) VALUES (?, ?)', [name, 1]);
+                await db.run('INSERT INTO users (name, Quantity, type) VALUES (?, ?, ?)', [name, 1, "Nigga"]);
             }
             res.status(201).json({ message: "User processed" });
         } catch (err) {
@@ -44,33 +78,11 @@ const dbPromise = open({
         }
     });
  
-    app.post("/api/corrosive/create", async (req, res) => {
-        const { name } = req.body;
-        if (!name) {
-            return res.status(400).json({ error: "Item name is required" });
-        }
-        try {
-            const item = await db.get('SELECT * FROM users WHERE name = ? AND type = ?', [name, 'corrosive']);
-            if (item) {
-                await db.run('UPDATE users SET Quantity = Quantity + 1 WHERE id = ?', [item.id]);
-            } else {
-                await db.run('INSERT INTO users (name, Quantity, type) VALUES (?, ?, ?)', [name, 1, 'corrosive']);
-            }
-            res.status(201).json({ message: "Corrosive item processed" });
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
-    });
-    
-    // New endpoint to fetch corrosive items only
-    app.get("/api/corrosive", async (req, res) => {
-        try {
-            const items = await db.all('SELECT * FROM users WHERE type = ?', ['corrosive']);
-            res.json(items);
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
-    });
+   
+
+   
+  
+
 
     app.post("/api/user/delete", async (req, res) => {
         const { id } = req.body;

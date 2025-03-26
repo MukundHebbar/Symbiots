@@ -10,8 +10,8 @@ const MainGrid = () => {
   const categories = [
     { name: 'Flammable', path: '/pages/flame', className: 'flammable' },
     { name: 'Corrosive', path: '/pages/corrosive', className: 'corrosive' },
-    { name: 'Toxic', path: '/pages/toxic', className: 'toxic' },
-    { name: '', path: '', className: 'blank' }
+    { name: 'Cold Chain', path: '/pages/toxic', className: 'toxic' },
+    { name: 'Others', path: '', className: 'blank' }
   ];
 
   return (

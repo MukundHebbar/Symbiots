@@ -24,7 +24,7 @@ const handleAddUser = async () => {
     if (!name.trim()) return;
 
     try {
-        await axios.post("/api/items/toxic", { name });
+        await axios.post("/api/items/create/toxic", { name });
         setName("");
         fetchUsers();
     } catch (error) {
@@ -61,7 +61,7 @@ const handleAddUser = async () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-4">
-      <h1 className="text-3xl font-bold mb-4">toxic Items</h1>
+      <h1 className="text-3xl font-bold mb-4">Cold Chain Items</h1>
 
       {/* Input Field */}
       <div className="flex gap-2 mb-4">

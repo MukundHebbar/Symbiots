@@ -1,118 +1,135 @@
 @import "tailwindcss";
 
+/* 🌟 Elegant Background */
+body {
+    font-family: 'Inter', sans-serif;
+    background: #f8f9fc;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* 🔹 Main Container */
 .app-container {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: rgb(17, 24, 39);
-    color: white;
-  }
-  
-  .grid-container {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
-    padding: 2rem;
-  }
-  
-  .category-card {
-    width: 200px;
-    height: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: transform 0.2s, background-color 0.2s;
-  }
-  
-  .category-card.flammable {
-    background-color: rgb(185, 28, 28);
-  }
-  
-  .category-card.toxic {
-    background-color: rgb(22, 163, 74);
-  }
-  
-  .category-card.corrosive {
-    background-color: rgb(202, 138, 4);
-  }
-  
-  .category-card.blank {
-    background-color: rgb(255, 255, 255);
-  }
-  
-  .category-card:hover {
-    transform: scale(1.05);
-    filter: brightness(1.2);
-  }
-  
-  .category-title {
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-align: center;
-    color: white;
-    text-decoration: none;
-  }
-  
-  .blank-card {
-    cursor: default;
-  }
-  
-  .blank-card:hover {
-    transform: none;
-    filter: none;
-  }
+    padding-top: 5rem;
+    padding-bottom: 2rem;
+}
 
-  /* ...existing app-container and grid styles... */
-
-/* Add these new header styles */
+/* 📌 Header - Glassmorphism for Premium Look */
 .header-container {
     width: 100%;
-    background-color: rgb(6, 182, 212);
-    padding: 1rem;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    padding: 1rem 2rem;
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 10;
-  }
-  
-  .header-content {
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
     max-width: 1200px;
     margin: 0 auto;
     display: flex;
     align-items: center;
-    position: relative;
-  }
-  
-  .header-title {
-    width: 100%;
-    text-align: center;
+    justify-content: space-between;
+}
+
+.header-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #1e293b;
+}
+
+/* 🏠 Home Button */
+.home-button {
+    padding: 0.5rem 1.2rem;
+    background: #2563eb;
     color: white;
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
-  
-  .home-button {
-    position: absolute;
-    left: 1rem;
-    padding: 0.5rem 1rem;
-    background-color: white;
-    color: rgb(6, 182, 212);
-    border-radius: 0.25rem;
+    border-radius: 8px;
+    font-weight: 500;
     text-decoration: none;
-    font-weight: bold;
-    transition: background-color 0.2s;
-  }
-  
-  .home-button:hover {
-    background-color: rgb(241, 245, 249);
-  }
-  
-  /* Update app-container to account for fixed header */
-  .app-container {
-    padding-top: 4rem;
-    /* ...keep existing app-container properties... */
-  }
+    transition: all 0.3s ease-in-out;
+}
+
+.home-button:hover {
+    background: #1d4ed8;
+}
+
+/* 🔲 Grid Layout */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    padding: 2rem;
+    width: 100%;
+    max-width: 1100px;
+}
+
+/* 📦 Category Cards - Clean, Neumorphic Look */
+.category-card {
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* 🌟 Professional Color Scheme */
+.category-card.flammable {
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+    color: white;
+}
+
+.category-card.cold {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    color: blue;
+}
+
+.category-card.corrosive {
+    background: linear-gradient(135deg, #d97706, #facc15);
+    color: white;
+}
+
+.category-card.blank {
+    background: rgba(200, 200, 200, 0.1);
+    cursor: default;
+}
+
+/* 🎨 Text Styling */
+.category-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+}
+
+/* 📱 Responsive Design */
+@media (max-width: 768px) {
+    .grid-container {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+    .category-card {
+        height: 180px;
+    }
+    .header-title {
+        font-size: 1.5rem;
+    }
+}

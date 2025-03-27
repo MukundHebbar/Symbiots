@@ -5,6 +5,7 @@ import Corrosive from "./pages/corrosive.jsx";
 import Flame from "./pages/flame.jsx";
 import './App.css';
 import Header from "./assets/header";
+import Alerts from "./assets/alerts";
 
 const MainGrid = () => {
   const categories = [
@@ -16,6 +17,7 @@ const MainGrid = () => {
 
   return (
     <div className="app-container">
+      <Alerts/>
       <div className="grid-container">
         {categories.map((category, index) => (
           <div 

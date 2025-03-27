@@ -97,9 +97,9 @@ body {
     color: white;
 }
 
-.category-card.cold {
+.category-card.toxic {
     background: linear-gradient(135deg, #2563eb, #3b82f6);
-    color: blue;
+    color: white;
 }
 
 .category-card.corrosive {

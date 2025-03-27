@@ -15,18 +15,83 @@ const dbPromise = open({
 (async () => {
     const db = await dbPromise;
     
-    // Create table if not exists (for new databases)
-    await db.exec('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, Quantity INTEGER DEFAULT 1, type TEXT NOT NULL , rfid INTEGER);');
+    // Create users table (existing)
+    await db.exec('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, Quantity INTEGER DEFAULT 1, type TEXT NOT NULL , rfid TEXT NOT NULL);');
     
-    // If the table already exists, check if the Quantity column is present.
-    const columns = await db.all("PRAGMA table_info(users)");
-    const quantityExists = columns.some(col => col.name === "Quantity");
-    if (!quantityExists) {
-        // Add the Quantity column to the existing table.
-        await db.exec('ALTER TABLE users ADD COLUMN Quantity INTEGER DEFAULT 1;');
+    
+
+    // Create alerts table
+    await db.exec('CREATE TABLE IF NOT EXISTS alerts (id INTEGER PRIMARY KEY, type TEXT NOT NULL, location TEXT NOT NULL);');
+
+await db.exec('CREATE TABLE IF NOT EXISTS rfid (rfid TEXT);');
+    
+    // Initialize the table with one empty row if it doesn't exist
+    const rfidRow = await db.get('SELECT * FROM rfid');
+    if (!rfidRow) {
+        await db.run('INSERT INTO rfid (rfid) VALUES (?)', ['']);
     }
+
+    // Endpoint to update RFID value
+    app.put("/api/rfid", async (req, res) => {
+        const { rfid } = req.body;
+        if (!rfid) {
+            return res.status(400).json({ error: "RFID value is required" });
+        }
+        try {
+            // First update the rfid table
+            await db.run('UPDATE rfid SET rfid = ?', [rfid]);
     
-   
+            // Check if this RFID exists in users table
+            const user = await db.get('SELECT * FROM users WHERE rfid = ?', [rfid]);
+            if (user) {
+                // If exists, increment the quantity
+                await db.run('UPDATE users SET Quantity = Quantity + 1 WHERE rfid = ?', [rfid]);
+                return res.status(200).json({ 
+                    message: "RFID value updated and quantity incremented",
+                    updatedUser: user.name
+                });
+            }
+    
+            res.status(200).json({ message: "RFID value updated successfully" });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+    // Add endpoints for alerts
+    app.post("/api/alerts/create", async (req, res) => {
+        const { type, location } = req.body;
+        if (!type || !location) {
+            return res.status(400).json({ error: "Type and location are required" });
+        }
+        try {
+            await db.run('INSERT INTO alerts (type, location) VALUES (?, ?)', [type, location]);
+            res.status(201).json({ message: "Alert created successfully" });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+    app.get("/api/alerts", async (req, res) => {
+        try {
+            const alerts = await db.all('SELECT * FROM alerts');
+            res.json(alerts);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+    app.delete("/api/alerts/:id", async (req, res) => {
+        const { id } = req.params;
+        try {
+            await db.run('DELETE FROM alerts WHERE id = ?', [id]);
+            res.status(200).json({ message: "Alert deleted successfully" });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
+
+    // ...existing endpoints...
     
     app.post("/api/items/create/:category", async (req, res) => {
         const { name } = req.body;
@@ -37,11 +102,18 @@ const dbPromise = open({
         }
         
         try {
+            // Get current RFID value
+            const rfidData = await db.get('SELECT rfid FROM rfid LIMIT 1');
+            if (!rfidData || !rfidData.rfid) {
+                return res.status(400).json({ error: "No RFID value available" });
+            }
+    
             const item = await db.get('SELECT * FROM users WHERE name = ? AND type = ?', [name, category]);
             if (item) {
                 await db.run('UPDATE users SET Quantity = Quantity + 1 WHERE id = ?', [item.id]);
             } else {
-                await db.run('INSERT INTO users (name, Quantity, type) VALUES (?, ?, ?)', [name, 1, category]);
+                await db.run('INSERT INTO users (name, Quantity, type, rfid) VALUES (?, ?, ?, ?)', 
+                    [name, 1, category, rfidData.rfid]);
             }
             res.status(201).json({ message: `${category} item processed` });
         } catch (err) {
@@ -61,22 +133,29 @@ const dbPromise = open({
     });
    
     app.post("/api/user/create", async (req, res) => {
-        const { name } = req.body;
-        if (!name) {
-            return res.status(400).json({ error: "User name is required" });
+    const { name } = req.body;
+    if (!name) {
+        return res.status(400).json({ error: "User name is required" });
+    }
+    try {
+        // Get current RFID value
+        const rfidData = await db.get('SELECT rfid FROM rfid LIMIT 1');
+        if (!rfidData || !rfidData.rfid) {
+            return res.status(400).json({ error: "No RFID value available" });
         }
-        try {
-            const user = await db.get('SELECT * FROM users WHERE name = ?', [name]);
-            if (user) {
-                await db.run('UPDATE users SET Quantity = Quantity + 1 WHERE id = ?', [user.id]);
-            } else {
-                await db.run('INSERT INTO users (name, Quantity, type) VALUES (?, ?, ?)', [name, 1, "Nigga"]);
-            }
-            res.status(201).json({ message: "User processed" });
-        } catch (err) {
-            res.status(500).json({ error: err.message });
+
+        const user = await db.get('SELECT * FROM users WHERE name = ?', [name]);
+        if (user) {
+            await db.run('UPDATE users SET Quantity = Quantity + 1 WHERE id = ?', [user.id]);
+        } else {
+            await db.run('INSERT INTO users (name, Quantity, type, rfid) VALUES (?, ?, ?, ?)', 
+                [name, 1, "User", rfidData.rfid]);
         }
-    });
+        res.status(201).json({ message: "User processed" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
  
    
 

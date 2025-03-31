@@ -60,67 +60,70 @@ const Flame = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-4">
-      <h1 className="text-3xl font-bold mb-4">Flammable Items</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white/90 p-6 transition-all duration-200">
+    {/* Title */}
+    <h1 className="text-4xl font-extrabold mb-6 tracking-wide text-red-400">🔥 Flammable Items</h1>
 
-      {/* Input Field */}
-      <div className="flex gap-2 mb-4">
+    {/* Input Field */}
+    <div className="flex gap-3 mb-6">
         <input
-          className="border border-gray-600 bg-gray-800 text-white p-2 rounded"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Enter item name"
+            className="border border-gray-700 bg-gray-800 text-white p-3 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter item name"
         />
         <button 
-          className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
-          onClick={handleAddUser}
-        >
-          Add Item
-        </button>
-      </div>
-
-      {/* Items List */}
-      {loading ? (
-        <p>Loading items...</p>
-      ) : (
-        <ul className="w-1/2 bg-gray-800 p-4 rounded-lg">
-          {users.length === 0 ? (
-            <p className="text-gray-400">No items found.</p>
-          ) : (
-            users.map((user) => (
-              <li 
-                key={user.id} 
-                className="flex justify-between items-center p-2 border-b border-gray-600"
-              >
-                <span>{user.name}</span>
-                <div className="flex items-center gap-2">
-                  <button
-                    className="bg-green-600 hover:bg-green-700 px-2 py-1 rounded"
-                    onClick={() => handleIncrementUser(user.id)}
-                  >
-                    +
-                  </button>
-                  <span>{user.Quantity}</span>
-                  <button
-                    className="bg-yellow-600 hover:bg-yellow-700 px-2 py-1 rounded"
-                    onClick={() => handleDecrementUser(user.id)}
-                  >
-                    -
-                  </button>
-                  <button
-                    className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded"
-                    onClick={() => handleDeleteUser(user.id)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </li>
-            ))
-          )}
-        </ul>
-      )}
+              className="bg-red-600 hover:bg-red-400 px-5 py-3 rounded-lg font-semibold shadow-lg transition-all duration-300 hover:shadow-xl flex items-center justify-center gap-2 text-black"
+              onClick={handleAddUser}
+            >
+              <span>➕</span>
+              <span>Add Item</span>
+            </button>
     </div>
+
+    {/* Items List */}
+    {loading ? (
+        <p className="text-lg font-semibold text-gray-400 animate-pulse">Loading items...</p>
+    ) : (
+        <ul className="w-full max-w-lg bg-gray-800 p-5 rounded-xl shadow-lg border border-gray-700">
+            {users.length === 0 ? (
+                <p className="text-gray-400 text-center text-lg">No items found.</p>
+            ) : (
+                users.map((user) => (
+                    <li 
+                        key={user.id} 
+                        className="flex justify-between items-center p-3 bg-gray-700 rounded-lg mb-3 shadow-md hover:bg-gray-600 transition-all duration-200"
+                    >
+                        <span className="font-medium text-lg">{user.name}</span>
+                        <div className="flex items-center gap-3">
+                            <button
+                                className="text-white w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-500 transition-colors font-bold"
+                                onClick={() => handleIncrementUser(user.id)}
+                            >
+                                +
+                            </button>
+                            <span className="text-lg font-semibold">{user.Quantity}</span>
+                            <button
+                                className="text-white w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-500 transition-colors font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                                onClick={() => handleDecrementUser(user.id)}
+                            >
+                                −
+                            </button>
+                            <button
+                                className="bg-white hover:bg-gray-200 px-3 py-2 rounded-lg font-medium shadow-md transition-all duration-300 text-black flex items-center gap-2 flex-1 sm:flex-none justify-center"
+                                onClick={() => handleDeleteUser(user.id)}
+                            >
+                                🗑️ Delete
+                            </button>
+                        </div>
+                    </li>
+                ))
+            )}
+        </ul>
+    )}
+</div>
+
   );
 };
 

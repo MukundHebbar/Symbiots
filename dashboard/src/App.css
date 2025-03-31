@@ -107,9 +107,9 @@ body {
     color: white;
 }
 
-.category-card.blank {
-    background: rgba(200, 200, 200, 0.1);
-    cursor: default;
+.category-card.others {
+    background: rgba(5, 204, 15, 0.901);
+    color: wheat;
 }
 
 /* 🎨 Text Styling */

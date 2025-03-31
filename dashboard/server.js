@@ -18,7 +18,13 @@ const dbPromise = open({
     // Create users table (existing)
     await db.exec('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT NOT NULL, Quantity INTEGER DEFAULT 1, type TEXT NOT NULL , rfid TEXT NOT NULL);');
     
+    await db.exec('CREATE TABLE IF NOT EXISTS esp32 (type TEXT);');
     
+    // Initialize esp32 table with one empty row if it doesn't exist
+    const esp32Row = await db.get('SELECT * FROM esp32');
+    if (!esp32Row) {
+        await db.run('INSERT INTO esp32 (type) VALUES (?)', ['']);
+    }
 
     // Create alerts table
     await db.exec('CREATE TABLE IF NOT EXISTS alerts (id INTEGER PRIMARY KEY, type TEXT NOT NULL, location TEXT NOT NULL);');
@@ -30,6 +36,16 @@ await db.exec('CREATE TABLE IF NOT EXISTS rfid (rfid TEXT);');
     if (!rfidRow) {
         await db.run('INSERT INTO rfid (rfid) VALUES (?)', ['']);
     }
+
+
+    app.get("/api/esp32", async (req, res) => {
+        try {
+            const esp32Data = await db.get('SELECT type FROM esp32');
+            res.json(esp32Data);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    });
 
     // Endpoint to update RFID value
     app.put("/api/rfid", async (req, res) => {
@@ -46,9 +62,14 @@ await db.exec('CREATE TABLE IF NOT EXISTS rfid (rfid TEXT);');
             if (user) {
                 // If exists, increment the quantity
                 await db.run('UPDATE users SET Quantity = Quantity + 1 WHERE rfid = ?', [rfid]);
+                
+                // Update esp32 table with the user's type
+                await db.run('UPDATE esp32 SET type = ?', [user.type]);
+                
                 return res.status(200).json({ 
-                    message: "RFID value updated and quantity incremented",
-                    updatedUser: user.name
+                    message: "RFID value updated, quantity incremented, and ESP32 type updated",
+                    updatedUser: user.name,
+                    updatedType: user.type
                 });
             }
     

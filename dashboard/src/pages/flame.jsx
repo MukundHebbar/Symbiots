@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import SensorDataDisplay from "../assets/thingspeak"; // Make sure the path is correct
 const Flame = () => {
   const [users, setUsers] = useState(null);
   const [name, setName] = useState("");
@@ -64,8 +64,12 @@ const Flame = () => {
     {/* Title */}
     <h1 className="text-4xl font-extrabold mb-6 tracking-wide text-red-400">🔥 Flammable Items</h1>
 
+    <div className="mb-6">
+        <SensorDataDisplay fieldNumber={1} />
+      </div>
     {/* Input Field */}
     <div className="flex gap-3 mb-6">
+        
         <input
             className="border border-gray-700 bg-gray-800 text-white p-3 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
             type="text"

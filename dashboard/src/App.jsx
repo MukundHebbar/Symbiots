@@ -7,6 +7,8 @@ import './App.css';
 import Header from "./assets/header";
 import Alerts from "./assets/alerts";
 import Others from "./pages/others.jsx"
+import SensorWatcher from "./assets/SensorWatcher"; // Import the watcher
+
 const MainGrid = () => {
   const categories = [
     { name: 'Flammable', path: '/pages/flame', className: 'flammable' },
@@ -40,7 +42,8 @@ const App = () => {
 
   return (
     <>
-    <Header/>
+    <Header/> 
+    <SensorWatcher/>
     <Routes>
       <Route path="/" element={<MainGrid />} />
       <Route path="/pages/toxic" element={<Toxic />} />

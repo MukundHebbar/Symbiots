@@ -65,7 +65,8 @@ const Flame = () => {
     <h1 className="text-4xl font-extrabold mb-6 tracking-wide text-red-400">🔥 Flammable Items</h1>
 
     <div className="mb-6">
-        <SensorDataDisplay fieldNumber={1} />
+        <SensorDataDisplay fieldNumber={3} />
+        <SensorDataDisplay fieldNumber={4} />  
       </div>
     {/* Input Field */}
     <div className="flex gap-3 mb-6">

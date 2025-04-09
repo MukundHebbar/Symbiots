@@ -124,7 +124,9 @@ const Others = () => {
         <h1 className="text-3xl md:text-4xl font-extrabold mb-6 tracking-wide text-amber-300 drop-shadow-lg">
             📦 Other Items 
         </h1>
-
+        <div className="mb-6">
+         
+      </div>
         {/* Input Field */}
         <div className="w-full max-w-lg mb-6">
           <div className="flex gap-3 flex-col sm:flex-row">

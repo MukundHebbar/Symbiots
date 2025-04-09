@@ -20,6 +20,8 @@ const dbPromise = open({
     
     await db.exec('CREATE TABLE IF NOT EXISTS esp32 (type TEXT);');
     
+    await db.exec('CREATE TABLE IF NOT EXISTS alerts (id INTEGER PRIMARY KEY, time TEXT NOT NULL, description TEXT NOT NULL);');
+
     // Initialize esp32 table with one empty row if it doesn't exist
     const esp32Row = await db.get('SELECT * FROM esp32');
     if (!esp32Row) {
@@ -40,7 +42,10 @@ await db.exec('CREATE TABLE IF NOT EXISTS rfid (rfid TEXT);');
 
     app.get("/api/esp32", async (req, res) => {
         try {
+            // Retrieve the current value from the esp32 table
             const esp32Data = await db.get('SELECT type FROM esp32');
+            // "Flush" the table by resetting the type to an empty string
+            await db.run("UPDATE esp32 SET type = ''");
             res.json(esp32Data);
         } catch (err) {
             res.status(500).json({ error: err.message });
@@ -81,12 +86,13 @@ await db.exec('CREATE TABLE IF NOT EXISTS rfid (rfid TEXT);');
 
     // Add endpoints for alerts
     app.post("/api/alerts/create", async (req, res) => {
-        const { type, location } = req.body;
-        if (!type || !location) {
-            return res.status(400).json({ error: "Type and location are required" });
+        const { description } = req.body;
+        if (!description) {
+            return res.status(400).json({ error: "Description is required" });
         }
         try {
-            await db.run('INSERT INTO alerts (type, location) VALUES (?, ?)', [type, location]);
+            const time = new Date().toLocaleTimeString();
+            await db.run('INSERT INTO alerts (time, description) VALUES (?, ?)', [time, description]);
             res.status(201).json({ message: "Alert created successfully" });
         } catch (err) {
             res.status(500).json({ error: err.message });

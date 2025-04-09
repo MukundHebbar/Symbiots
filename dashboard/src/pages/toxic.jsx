@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import SensorDataDisplay from "../assets/thingspeak"; // Make sure the path is correct
 
 const Toxic = () => {
   const [users, setUsers] = useState(null); // null for loading state
@@ -62,6 +63,11 @@ const handleAddUser = async () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white/90 p-6 transition-all duration-200">
     {/* Title */}
+    <div className="mb-6">
+    <SensorDataDisplay fieldNumber={1} />
+    <SensorDataDisplay fieldNumber={2} />
+      </div>
+    
     <h1 className="text-4xl font-extrabold mb-6 tracking-wide text-blue-300 drop-shadow-lg">
         ❄️ Cold Chain Items
     </h1>

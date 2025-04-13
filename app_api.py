@@ -139,28 +139,32 @@ st.markdown("---")
 
 
 
+# filepath: /home/mukund-hebbar/projectIot/app_api.py
+# ...existing code...
+
 BASE_API_URL = "http://192.168.YOUR.IP:PORT" # <-- Replace with your actual base server URL (e.g., http://192.168.1.100:5000)
 
-def send_classification_to_api(classification):
-    """Constructs the endpoint and sends the classification result to the API."""
+def send_classification_to_api(classification, extracted_text=None):
+    """Constructs the endpoint using classification and sends the extracted_text (or classification) as the name."""
     if not BASE_API_URL or BASE_API_URL == "http://192.168.YOUR.IP:PORT": # Basic check if URL is set
         print("[DEBUG] Base API URL not configured. Skipping POST request.")
-        # Optionally show a warning in the UI
-        # st.warning("API endpoint not configured. Cannot send result to server.")
         return
 
-    # Construct the full endpoint URL dynamically
+    # Construct the full endpoint URL dynamically using the classification category
     endpoint_url = f"{BASE_API_URL}/api/items/create/{classification}"
     print(f"[DEBUG] Constructed API endpoint: {endpoint_url}")
 
-    # Prepare the payload with the 'name' key
-    payload = {"name": classification}
+    # Prepare the payload: Use extracted_text for 'name' if available, otherwise use classification
+    payload_name = extracted_text if extracted_text else classification
+    payload = {"name": payload_name}
     headers = {"Content-Type": "application/json"}
+
+    print(f"[DEBUG] Sending POST to {endpoint_url} with payload: {payload}") # Log the payload being sent
 
     try:
         response = requests.post(endpoint_url, json=payload, headers=headers, timeout=10) # 10 second timeout
         response.raise_for_status() # Raise an exception for bad status codes (4xx or 5xx)
-        print(f"[DEBUG] Successfully sent classification '{classification}' to API endpoint {endpoint_url}. Status: {response.status_code}")
+        print(f"[DEBUG] Successfully sent payload to API endpoint {endpoint_url}. Status: {response.status_code}")
         # Optionally show success in the UI
         # st.toast(f"Result '{classification}' sent to server.", icon="✅")
     except requests.exceptions.RequestException as e:
@@ -210,7 +214,7 @@ def classify_chemicals(text):
         # Control servo based on the classification result
         if result not in ["None"]:
             control_servo(result)
-            send_classification_to_api(result)
+            send_classification_to_api(result, text)
         return result
     except Exception as e:
         print(f"[DEBUG] Error in text classification: {str(e)}")

@@ -3,12 +3,12 @@ import axios from 'axios';
 
 const SensorWatcher = () => {
   const API_KEY = "B3B8RCLYHX513ND1"; // Replace with your actual API key
-  const calibrated = [10, 2, 45, 80, 10, 10]; // Threshold values for each field
+  const calibrated = [8, 50, 45, 50, 10, 10]; // Threshold values for each field
   const messages = [
-    "Alert at Cold storage temp",
-    "Alert at Cold storage hum",
-    "alert at flammable section temp",
-    "alert at flammable section hum",
+    "Alert at Cold storage temperature",
+    "Alert at Cold storage humidity",
+    "alert at flammable section temperture",
+    "alert at flammable section humidity",
     "Alert at gas section",
     "Alert at gas section"
   ];
@@ -36,7 +36,7 @@ const SensorWatcher = () => {
           const value = parseFloat(data[`field${fieldIndex}`]);
 
           // Check condition (here: if sensor value is above the threshold)
-          if (value > calibrated[i]) {
+          if (((i==0 || i==2) && (value > calibrated[i])) || ((i==1 ||i==3) && value<calibrated[i])) {
             // Check whether an alert with the same description already exists
             const occurrence = existingAlerts.filter(
               (alert) => alert.description === messages[i]

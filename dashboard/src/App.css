@@ -504,4 +504,39 @@ body {
     width: calc(100% - 40px);
     top: 60px;
   }
+} 
+
+/* Add this at the end of your file */
+
+/* ====== OCCUPANCY SECTION ====== */
+/* Replace the existing occupancy section with this simplified version */
+
+/* Replace your current occupancy section with this minimal version */
+
+.occupancy-container {
+  width: 100%;
+  max-width: 200px;
+  margin: 0 auto 1rem;
+}
+
+.occupancy-card {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  color: white;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.occupancy-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+@media (max-width: 768px) {
+  .occupancy-value {
+    font-size: 2rem;
+  }
 }

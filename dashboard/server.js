@@ -37,7 +37,50 @@ await db.exec('CREATE TABLE IF NOT EXISTS rfid (rfid TEXT);');
     if (!rfidRow) {
         await db.run('INSERT INTO rfid (rfid) VALUES (?)', ['']);
     }
+  // After the other table creation statements
+await db.exec('CREATE TABLE IF NOT EXISTS occupancy (count INTEGER DEFAULT 0);');
 
+// Initialize occupancy table with one row if it doesn't exist
+const occupancyRow = await db.get('SELECT * FROM occupancy');
+if (!occupancyRow) {
+    await db.run('INSERT INTO occupancy (count) VALUES (?)', [0]);
+}
+
+// Add this with the other API endpoints
+app.get("/api/occupancy", async (req, res) => {
+    try {
+        const occupancyData = await db.get('SELECT count FROM occupancy');
+        res.json(occupancyData);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+// Add this with the other API endpoints
+app.put("/api/occupancy", async (req, res) => {
+    const { count } = req.body;
+    
+    if (count === undefined) {
+        return res.status(400).json({ error: "Count value is required" });
+    }
+    
+    // Ensure count is a non-negative integer
+    const countValue = parseInt(count);
+    if (isNaN(countValue) || countValue < 0) {
+        return res.status(400).json({ error: "Count must be a non-negative integer" });
+    }
+    
+    try {
+        await db.run('UPDATE occupancy SET count = ?', [countValue]);
+        res.status(200).json({ 
+            message: "Occupancy count updated successfully",
+            newCount: countValue
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
     app.get("/api/esp32", async (req, res) => {
         try {
@@ -92,7 +135,7 @@ await db.exec('CREATE TABLE IF NOT EXISTS rfid (rfid TEXT);');
         }
         try {
             const time = new Date().toLocaleTimeString();
-            await db.run('INSERT INTO alerts (time, description) VALUES (?, ?)', [time, description]);
+            await db.run('INSERT INTO alerts (id,time, description) VALUES (?,?, ?)', [id,time, description]);
             res.status(201).json({ message: "Alert created successfully" });
         } catch (err) {
             res.status(500).json({ error: err.message });
@@ -148,16 +191,19 @@ await db.exec('CREATE TABLE IF NOT EXISTS rfid (rfid TEXT);');
         }
     });
     
-    // Generic endpoint to fetch items by category
-    app.get("/api/items/:category", async (req, res) => {
-        const { category } = req.params;
-        try {
-            const items = await db.all('SELECT * FROM users WHERE type = ?', [category]);
-            res.json(items);
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
-    });
+   // Generic endpoint to fetch items by category - only returns items with quantity > 0
+app.get("/api/items/:category", async (req, res) => {
+    const { category } = req.params;
+    try {
+        const items = await db.all(
+            'SELECT * FROM users WHERE type = ? AND Quantity > 0', 
+            [category]
+        );
+        res.json(items);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
    
     app.post("/api/user/create", async (req, res) => {
     const { name } = req.body;
@@ -215,24 +261,25 @@ await db.exec('CREATE TABLE IF NOT EXISTS rfid (rfid TEXT);');
     });
 
     // New endpoint to decrement user's quantity (won't decrement below 1)
-    app.post("/api/user/decrement", async (req, res) => {
-        const { id } = req.body;
-        if (!id) {
-            return res.status(400).json({ error: "User id is required" });
-        }
-        try {
-            await db.run(
-                `UPDATE users 
-                 SET Quantity = CASE 
-                                   WHEN Quantity > 1 THEN Quantity - 1 
-                                   ELSE 1 
-                                END 
-                 WHERE id = ?`, [id]);
-            res.status(200).json({ message: "User quantity decremented" });
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
-    });
+   // New endpoint to decrement user's quantity (will now allow going to zero)
+app.post("/api/user/decrement", async (req, res) => {
+    const { id } = req.body;
+    if (!id) {
+        return res.status(400).json({ error: "User id is required" });
+    }
+    try {
+        await db.run(
+            `UPDATE users 
+             SET Quantity = CASE 
+                               WHEN Quantity > 0 THEN Quantity - 1 
+                               ELSE 0 
+                            END 
+             WHERE id = ?`, [id]);
+        res.status(200).json({ message: "User quantity decremented" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
     app.get("/api/users", async (req, res) => {
         try {

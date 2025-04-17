@@ -6,8 +6,9 @@ import Flame from "./pages/flame.jsx";
 import './App.css';
 import Header from "./assets/header";
 import Alerts from "./assets/alerts";
+import Occupancy from "./assets/occupancy"; // Import the Occupancy component
 import Others from "./pages/others.jsx"
-import SensorWatcher from "./assets/SensorWatcher"; // Import the watcher
+import SensorWatcher from "./assets/SensorWatcher";
 
 const MainGrid = () => {
   const categories = [
@@ -19,6 +20,7 @@ const MainGrid = () => {
 
   return (
     <div className="app-container">
+      <Occupancy /> {/* Add the Occupancy component before Alerts */}
       <Alerts/>
       <div className="grid-container">
         {categories.map((category, index) => (
@@ -37,6 +39,7 @@ const MainGrid = () => {
     </div>
   );
 };
+
 const App = () => {
   const location = useLocation();
 

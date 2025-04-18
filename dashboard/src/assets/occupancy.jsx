@@ -31,7 +31,7 @@ const Occupancy = () => {
   return (
     <div className="occupancy-container">
       <div className="occupancy-card">
-        <h2>Current Occupancy</h2>
+        <h2>EMPLOYEE OCCUPANCY</h2>
         <div className="occupancy-value">
           {loading ? "..." : occupancy}
         </div>

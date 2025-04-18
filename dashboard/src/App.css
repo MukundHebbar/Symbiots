@@ -418,94 +418,6 @@ body {
   background: rgba(200, 200, 200, 0.15);
 }
 
-/* ====== ALERTS SYSTEM ====== */
-.alerts-container {
-  position: fixed;
-  top: 70px;
-  right: 20px;
-  width: 350px;
-  max-height: 80vh;
-  overflow-y: auto;
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.alert-item {
-  background: rgba(255, 60, 60, 0.9);
-  border-left: 5px solid rgb(220, 38, 38);
-  color: white;
-  padding: 12px 15px;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  animation: slide-in 0.3s ease-out;
-}
-
-.alert-content {
-  flex: 1;
-}
-
-.alert-time {
-  font-size: 12px;
-  opacity: 0.8;
-  margin-bottom: 4px;
-}
-
-.alert-description {
-  font-weight: 500;
-}
-
-.resolve-btn {
-  background: rgba(255, 255, 255, 0.25);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 5px 10px;
-  margin-left: 10px;
-  cursor: pointer;
-  transition: background 0.2s;
-  font-weight: 500;
-}
-
-.resolve-btn:hover {
-  background: rgba(255, 255, 255, 0.35);
-}
-
-@keyframes slide-in {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-/* ====== RESPONSIVE ADJUSTMENTS ====== */
-@media (max-width: 768px) {
-  .grid-container {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  }
-  
-  .category-card {
-    height: 180px;
-  }
-  
-  .header-title {
-    font-size: 1.5rem;
-  }
-  
-  .alerts-container {
-    width: calc(100% - 40px);
-    top: 60px;
-  }
-} 
-
 /* Add this at the end of your file */
 
 /* ====== OCCUPANCY SECTION ====== */
@@ -515,28 +427,125 @@ body {
 
 .occupancy-container {
   width: 100%;
-  max-width: 200px;
-  margin: 0 auto 1rem;
+  max-width: 240px; /* Slightly wider for better balance */
+  margin-top: 3.58rem;
+  margin-left: -3rem;
 }
 
 .occupancy-card {
-  background: linear-gradient(135deg, #1e293b, #0f172a);
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(145deg, #1e293b, #0f172a);
+  border-radius: 12px; /* Smoother corners */
+  padding: 1.5rem;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.2),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Layered shadow */
   color: white;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effect */
+  overflow: hidden; /* For the pseudo-element */
+  position: relative;
+}
+
+/* Subtle shine effect */
+.occupancy-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.03) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  pointer-events: none;
+}
+
+.occupancy-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.2),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.occupancy-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
 }
 
 .occupancy-value {
-  font-size: 2.5rem;
+  font-size: 2.75rem; /* Slightly larger */
   font-weight: 800;
   color: #f8fafc;
+  margin: 0.5rem 0;
+  font-feature-settings: "tnum"; /* Tabular numbers for consistent width */
+  font-variant-numeric: tabular-nums;
+  position: relative;
+  display: inline-block;
+}
+
+/* Animated underline effect */
+.occupancy-value::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #60a5fa, #3b82f6);
+  transform: scaleX(0.8);
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+
+.occupancy-card:hover .occupancy-value::after {
+  transform: scaleX(1);
+}
+
+.occupancy-subtext {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+.occupancy-trend {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.trend-up {
+  color: #4ade80;
+}
+
+.trend-down {
+  color: #f87171;
 }
 
 @media (max-width: 768px) {
+  .occupancy-container {
+    max-width: 100%;
+  }
+  
+  .occupancy-card {
+    padding: 1.25rem;
+  }
+  
   .occupancy-value {
-    font-size: 2rem;
+    font-size: 2.25rem;
   }
 }
+
+

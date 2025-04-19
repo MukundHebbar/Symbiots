@@ -97,9 +97,27 @@ void loop() {
       Serial.println("✅ Write successful!");
     }
 
+    // Halt and stop encryption after writing
     rfid.PICC_HaltA();
     rfid.PCD_StopCrypto1();
 
-    Serial.println("Enter another ID to write:");
-  }
-}
+    // Optional: Add a small delay to ensure the card is ready before trying to read again
+    delay(500);  // 500ms delay
+
+    // Re-initialize and wait for the same card to be detected again
+    Serial.println("Try to re-read the card...");
+    while (!rfid.PICC_IsNewCardPresent() || !rfid.PICC_ReadCardSerial());
+
+    // Read UID again
+    char uidString[20];
+    sprintf(uidString, "%02X%02X%02X%02X", 
+            rfid.uid.uidByte[0], 
+            rfid.uid.uidByte[1], 
+            rfid.uid.uidByte[2], 
+            rfid.uid.uidByte[3]);
+
+    Serial.print("UID Re-read: ");
+    Serial.println(uidString);
+
+    // Halt and stop encryption again
+    rfid.PICC_HaltA_

@@ -15,6 +15,12 @@
 #define CORROSIVE_SERVO_PIN 17
 #define COLD_SERVO_PIN 4
 
+// LED pins
+#define FLAME_LED_PIN 21
+#define TOXIC_LED_PIN 19
+#define CORROSIVE_LED_PIN 18
+#define COLD_LED_PIN 2
+
 MFRC522 mfrc522(SS_PIN, RST_PIN);  
 Servo flameServo, otherServo, corrosiveServo, coldServo;
 
@@ -37,11 +43,15 @@ void setup() {
     corrosiveServo.attach(CORROSIVE_SERVO_PIN);
     coldServo.attach(COLD_SERVO_PIN);
 
-    // Close all servos
-    flameServo.write(0);
-    otherServo.write(0);
-    corrosiveServo.write(0);
-    coldServo.write(0);
+    // Initialize LED pins
+    pinMode(FLAME_LED_PIN, OUTPUT);
+    pinMode(TOXIC_LED_PIN, OUTPUT);
+    pinMode(CORROSIVE_LED_PIN, OUTPUT);
+    pinMode(COLD_LED_PIN, OUTPUT);
+
+    // Turn everything off initially
+    closeAllServos();
+    turnOffAllLEDs();
 
     Serial.println("Connecting to Wi-Fi...");
     WiFi.begin(ssid, password);
@@ -74,10 +84,7 @@ void loop() {
         Serial.print("UID Detected: ");
         Serial.println(uid_string);
 
-        // Send UID + quantity read from card to server
         sendToServer(uid_string);
-
-        // Fetch updated type from /api/esp32
         getCategoryFromServer();
 
         mfrc522.PICC_HaltA();
@@ -88,10 +95,10 @@ void loop() {
         char input = Serial.read();
         closeAllServos();
 
-        if (input == '1') { flameServo.write(90); delay(5000); flameServo.write(0); }
-        else if (input == '2') { coldServo.write(90); delay(5000); coldServo.write(0); }
-        else if (input == '3') { corrosiveServo.write(90); delay(5000); corrosiveServo.write(0); }
-        else if (input == '4') { otherServo.write(90); delay(5000); otherServo.write(0); }
+        if (input == '1') { activateServoWithLED(flameServo, FLAME_LED_PIN); }
+        else if (input == '2') { activateServoWithLED(coldServo, COLD_LED_PIN); }
+        else if (input == '3') { activateServoWithLED(corrosiveServo, CORROSIVE_LED_PIN); }
+        else if (input == '4') { activateServoWithLED(otherServo, TOXIC_LED_PIN); }
     }
 }
 
@@ -102,7 +109,22 @@ void closeAllServos() {
     otherServo.write(0);
 }
 
-// ✅ NEW: Read payload from RFID and send JSON to server
+void turnOffAllLEDs() {
+    digitalWrite(FLAME_LED_PIN, LOW);
+    digitalWrite(TOXIC_LED_PIN, LOW);
+    digitalWrite(CORROSIVE_LED_PIN, LOW);
+    digitalWrite(COLD_LED_PIN, LOW);
+}
+
+void activateServoWithLED(Servo& servo, int ledPin) {
+    servo.write(90);
+    digitalWrite(ledPin, HIGH);
+    delay(250);
+    digitalWrite(ledPin, LOW);
+    delay(4750);  // Total delay = 5000ms
+    servo.write(0);
+}
+
 void sendToServer(String uid) {
     byte block = 1;
     byte buffer[18];
@@ -128,7 +150,6 @@ void sendToServer(String uid) {
         return;
     }
 
-    // Extract 4-byte quantity from byte 4-7
     int quantity = (buffer[4] << 24) | (buffer[5] << 16) | (buffer[6] << 8) | buffer[7];
 
     Serial.print("Quantity from RFID: ");
@@ -208,13 +229,13 @@ void controlServo(String updatedType) {
     Serial.println("Controlling servo for type: " + updatedType);
 
     if (updatedType == "flame") {
-        flameServo.write(90); delay(10000); flameServo.write(0);
+        activateServoWithLED(flameServo, FLAME_LED_PIN);
     } else if (updatedType == "toxic") {
-        otherServo.write(90); delay(10000); otherServo.write(0);
+        activateServoWithLED(otherServo, TOXIC_LED_PIN);
     } else if (updatedType == "corrosive") {
-        corrosiveServo.write(90); delay(10000); corrosiveServo.write(0);
+        activateServoWithLED(corrosiveServo, CORROSIVE_LED_PIN);
     } else if (updatedType == "others") {
-        coldServo.write(90); delay(10000); coldServo.write(0);
+        activateServoWithLED(coldServo, COLD_LED_PIN);
     } else {
         Serial.println("Unknown type. No servo triggered.");
     }

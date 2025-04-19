@@ -120,4 +120,9 @@ void loop() {
     Serial.println(uidString);
 
     // Halt and stop encryption again
-    rfid.PICC_HaltA_
+    rfid.PICC_HaltA();
+    rfid.PCD_StopCrypto1();
+
+    Serial.println("Enter another ID to write:");
+  }
+}

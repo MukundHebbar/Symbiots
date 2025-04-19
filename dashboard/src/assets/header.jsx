@@ -43,7 +43,7 @@ const Header = () => {
           </div>
         </div>
         
-        <h1 className="header-title">Warehouse Inventory</h1>
+        <h1 className="header-title">Warehouse SOLUTIONS</h1>
       </div>
     </header>
   );

@@ -16,17 +16,16 @@ const long gmtOffset_sec = 19800; // IST: GMT+5:30
 const int daylightOffset_sec = 0;
 
 // Sensor pins
-const int ir1Pin = 2;  // Entry sensor
-const int ir2Pin = 16; // Exit sensor
+const int ir1Pin = 2;  // Exit sensor
+const int ir2Pin = 16; // Entry sensor
 
-// Variables
+// Tracking variables
 int occupancyCount = 0;
 unsigned long lastTriggerTime = 0;
-const unsigned long IGNORE_DURATION = 5000; // 5 seconds ignore
+const unsigned long IGNORE_DURATION = 5000;
 
-// Edge detection
-int prevIR1State = HIGH;
-int prevIR2State = HIGH;
+int lastIR1State = HIGH;
+int lastIR2State = HIGH;
 
 void setup() {
   Serial.begin(115200);
@@ -90,20 +89,20 @@ void loop() {
   int hour = timeinfo.tm_hour;
   bool isNightTime = (hour >= 23 || hour < 10); // 11pm to 10am
 
-  // Read sensors
+  // Read current sensor states
   int ir1State = digitalRead(ir1Pin);
   int ir2State = digitalRead(ir2Pin);
 
   // Detect falling edge
-  bool ir1Triggered = (prevIR1State == HIGH && ir1State == LOW);
-  bool ir2Triggered = (prevIR2State == HIGH && ir2State == LOW);
-  prevIR1State = ir1State;
-  prevIR2State = ir2State;
+  bool ir1Falling = (lastIR1State == HIGH && ir1State == LOW);
+  bool ir2Falling = (lastIR2State == HIGH && ir2State == LOW);
+  lastIR1State = ir1State;
+  lastIR2State = ir2State;
 
   if (millis() - lastTriggerTime > IGNORE_DURATION) {
     if (!isNightTime) {
-      // Day mode: just intrusion alert
-      if (ir1Triggered || ir2Triggered) {
+      // Intrusion detection during daytime
+      if (ir1Falling || ir2Falling) {
         char timeStr[20];
         sprintf(timeStr, "%02d:%02d:%02d", timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
         Serial.printf("🚨 Intrusion detected at %s\n", timeStr);
@@ -112,16 +111,16 @@ void loop() {
       }
     } else {
       // Night mode: occupancy tracking
-      if (ir1Triggered) {
-        // IR1 is entry side → count as EXIT
-        if (occupancyCount > 0) occupancyCount--;
-        Serial.printf("🚪 Exit via IR1 detected. Count: %d\n", occupancyCount);
+      if (ir2Falling) {
+        // Entry
+        occupancyCount++;
+        Serial.printf("👤 Entry detected via IR2. Count: %d\n", occupancyCount);
         sendOccupancyUpdate(occupancyCount);
         lastTriggerTime = millis();
-      } else if (ir2Triggered) {
-        // IR2 is exit side → count as ENTRY
-        occupancyCount++;
-        Serial.printf("👤 Entry via IR2 detected. Count: %d\n", occupancyCount);
+      } else if (ir1Falling) {
+        // Exit
+        if (occupancyCount > 0) occupancyCount--;
+        Serial.printf("🚪 Exit detected via IR1. Count: %d\n", occupancyCount);
         sendOccupancyUpdate(occupancyCount);
         lastTriggerTime = millis();
       }

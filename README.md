@@ -1,2 +1,4 @@
 # Symbiots
-IoT project team repositroy - for the team - Mukund , Akshit and Sanjith
+IoT project team repository - for the team - Mukund , Akshit and Sanjith
+
+Latest version of the software stack.

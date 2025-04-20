@@ -26,6 +26,9 @@ const unsigned long DEBOUNCE_TIME = 1000; // 1 second debounce
 enum SystemState { IDLE, ENTRY_STARTED, EXIT_STARTED };
 SystemState currentState = IDLE;
 
+int prevIR1State = HIGH;
+int prevIR2State = HIGH;
+
 void setup() {
   Serial.begin(115200);
   Serial.println("\nStarting Security System...");
@@ -33,10 +36,8 @@ void setup() {
   pinMode(ir1Pin, INPUT);
   pinMode(ir2Pin, INPUT);
 
-  // Connect to Wi-Fi
   connectToWiFi();
 
-  // Sync time
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
   Serial.println("Time configured.");
 }
@@ -103,7 +104,6 @@ void sendOccupancyUpdate(int count) {
 }
 
 void loop() {
-  // Check WiFi periodically
   static unsigned long lastWifiCheck = 0;
   if (millis() - lastWifiCheck > 30000) {
     if (WiFi.status() != WL_CONNECTED) {
@@ -123,30 +123,38 @@ void loop() {
   int hour = timeinfo.tm_hour;
   bool isNightTime = (hour >= 23 || hour < 10); // 11pm to 10am
 
+  // Read current sensor states
   int ir1State = digitalRead(ir1Pin);
   int ir2State = digitalRead(ir2Pin);
 
+  // Detect falling edges
+  bool ir1Triggered = (prevIR1State == HIGH && ir1State == LOW);
+  bool ir2Triggered = (prevIR2State == HIGH && ir2State == LOW);
+
+  // Update previous states
+  prevIR1State = ir1State;
+  prevIR2State = ir2State;
+
   if (!isNightTime) {
     // Intrusion detection mode
-    if ((ir1State == LOW || ir2State == LOW) && millis() - lastEventTime > DEBOUNCE_TIME) {
+    if ((ir1Triggered || ir2Triggered) && millis() - lastEventTime > DEBOUNCE_TIME) {
       char timeStr[20];
       sprintf(timeStr, "%02d:%02d:%02d", hour, timeinfo.tm_min, timeinfo.tm_sec);
       Serial.printf("🚨 INTRUSION DETECTED at %s\n", timeStr);
       sendPostRequest(String(timeStr));
       lastEventTime = millis();
     }
-  } 
-  else {
+  } else {
     // Occupancy tracking mode with state machine
     if (millis() - lastEventTime > DEBOUNCE_TIME) {
       switch (currentState) {
         case IDLE:
-          if (ir1State == LOW) {
+          if (ir1Triggered) {
             currentState = ENTRY_STARTED;
             lastEventTime = millis();
             Serial.println("Potential entry started (IR1 triggered)");
           } 
-          else if (ir2State == LOW) {
+          else if (ir2Triggered) {
             currentState = EXIT_STARTED;
             lastEventTime = millis();
             Serial.println("Potential exit started (IR2 triggered)");
@@ -154,8 +162,7 @@ void loop() {
           break;
 
         case ENTRY_STARTED:
-          if (ir2State == LOW) {
-            // Entry confirmed (IR1 then IR2)
+          if (ir2Triggered) {
             occupancyCount++;
             Serial.printf("👤 Entry confirmed. Count: %d\n", occupancyCount);
             sendOccupancyUpdate(occupancyCount);
@@ -163,15 +170,13 @@ void loop() {
             lastEventTime = millis();
           } 
           else if (millis() - lastEventTime > 2000) {
-            // Timeout - reset to idle
             Serial.println("Entry sequence timed out");
             currentState = IDLE;
           }
           break;
 
         case EXIT_STARTED:
-          if (ir1State == LOW) {
-            // Exit confirmed (IR2 then IR1)
+          if (ir1Triggered) {
             if (occupancyCount > 0) occupancyCount--;
             Serial.printf("🚪 Exit confirmed. Count: %d\n", occupancyCount);
             sendOccupancyUpdate(occupancyCount);
@@ -179,7 +184,6 @@ void loop() {
             lastEventTime = millis();
           } 
           else if (millis() - lastEventTime > 2000) {
-            // Timeout - reset to idle
             Serial.println("Exit sequence timed out");
             currentState = IDLE;
           }

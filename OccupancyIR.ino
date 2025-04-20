@@ -62,7 +62,8 @@ void loop() {
     Serial.printf("👤 Entry detected. Count: %d\n", occupancyCount);
     sendOccupancyUpdate(occupancyCount);
     delay(5000);  // Ignore any further movement for 5 seconds
-  } else if (ir1State == LOW) {
+  } 
+  if (ir1State == LOW) {
     // Exit detected
     if (occupancyCount > 0) occupancyCount--;
     Serial.printf("🚪 Exit detected. Count: %d\n", occupancyCount);

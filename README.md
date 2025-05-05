@@ -71,12 +71,12 @@ A smart, modular IoT system for secure chemical warehouse management using **ESP
 
 ---
 
-## 📦 Backend API (`app_api.py`)
+## 📦 Backend API (`app_api.py`, 'server.js')
 
 - Accepts RFID reads, maps to chemical types
-- Exposes `/api/rfid` and `/api/esp32` endpoints
+- Exposes `/api/rfid` and `/api/esp32` and other endpoints using express js
 - Returns correct chemical classification
-
+- using database - SQLLite/MySQL
 ---
 
 ## ⚙️ Dependencies
@@ -87,9 +87,10 @@ A smart, modular IoT system for secure chemical warehouse management using **ESP
 - IR sensors (x2)
 - LEDs (x4)
 - DHT11 (optional for temp sensing)
-- Python 3.10+ (for backend)
-- FastAPI, Uvicorn (for API)
+- Python 3.10+ and express JS (for OCR and backend)
+- Python(for API)
 - Vite + React (for dashboard)
+- mySQL/SQLlite for database
 
 ---
 

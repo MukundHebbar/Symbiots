@@ -1,32 +1,105 @@
-Overview
-This repository contains the latest version (v5) of the software stack for our IoT-based warehouse management system. The project integrates hardware (e.g., ESP32 sensors) and software components to monitor and manage warehouse operations effectively.
+# 📦 IoT Warehouse Management System – v5
 
-Folder Structure and Functionalities
-Root Folder
- Basic information about the repository and its purpose.
+A smart, modular IoT system for secure chemical warehouse management using **ESP32**, **RFID**, **IR sensors**, **servo motors**, and a **React dashboard**.
 
-Contains the main project configuration files and scripts.
+---
 
-dashboard/
-Purpose: Front-end application built with React and Vite.
+## 🔧 Features
 
-Functionalities:
-Provides an interactive user interface for monitoring sensor data and managing alerts.
-Configured with ESLint for maintaining code quality.
-Includes templates and plugins for efficient development.
+- 🔐 **RFID-based access control** for chemical containers
+- 🧠 **Smart classification** of chemicals via backend API
+- 🤖 **Servo automation** for compartment access (Flammable, Corrosive, Cold, Other)
+- 🔦 **IR sensors** to detect unauthorized access attempts
+- 🌐 **React dashboard** with real-time data & alerts
+- 📡 Wi-Fi-based communication between ESP32 devices and server
 
+---
 
-ir_timeCode/
-Purpose: Arduino-based code for IR sensors.
-Functionalities:
-Detects intrusions during specific time intervals and sends alerts to the backend.
-Configures Wi-Fi settings and integrates with server endpoints.
+## 🗂️ Folder Structure
 
+| Folder/File           | Description                                      |
+|-----------------------|--------------------------------------------------|
+| `dashboard/`          | React front-end using Vite, for visualization   |
+| `ir_timeCode/`        | ESP32 + IR sensors for intrusion detection      |
+| `writeRFID.ino`       | Arduino sketch to write chemical data to RFID   |
+| `ProgrammableRFID.ino`| Checks if RFID tags are writeable               |
+| `UpdatedRFIDServo.ino`| Main logic: RFID → API → Servo/LED control      |
+| `app_api.py`          | Python backend API (FastAPI recommended)        |
 
-app_api.py
-Purpose: Back-end API for processing and managing warehouse operations.
-Functionalities:
-Manages RFID inputs, user data, and alert systems.
-Integrates with ESP32 for servo control and chemical classification.
-Provides endpoints for real-time data updates and response handling.
+---
 
+## 🔑 RFID Flow (`UpdatedRFIDServo.ino`)
+
+1. RFID card scanned → UID + data extracted  
+2. Data sent to `/api/rfid` as JSON  
+3. Server responds with chemical **type**  
+4. Correct **servo & LED** activated  
+5. Servo returns to default after delay  
+
+---
+
+## 💻 Frontend (`dashboard/`)
+
+- Built with **React + Vite**
+- ESLint support for code quality
+- Modular component system
+- Live updates from backend APIs
+
+---
+
+## 🔐 IR Security (`ir_timeCode/`)
+
+- Uses IR sensors + real-time clock logic
+- Sends alerts to server if movement is detected during restricted times
+
+---
+
+## 🧪 Writing RFID Cards (`writeRFID.ino`)
+
+- Preloaded with 6 card profiles:
+  - ID (4 bytes)
+  - Quantity (4 bytes)
+- Enter `1`–`6` via Serial to select card
+- Tap RFID tag to write data to block 1
+
+---
+
+## 🔍 Tag Testing (`ProgrammableRFID.ino`)
+
+- Confirms if tag can be written
+- Writes test message `TESTWRITEABLE` to block 4
+
+---
+
+## 📦 Backend API (`app_api.py`)
+
+- Accepts RFID reads, maps to chemical types
+- Exposes `/api/rfid` and `/api/esp32` endpoints
+- Returns correct chemical classification
+
+---
+
+## ⚙️ Dependencies
+
+- ESP32 board
+- MFRC522 RFID reader
+- Servo motors (x4)
+- IR sensors (x2)
+- LEDs (x4)
+- DHT11 (optional for temp sensing)
+- Python 3.10+ (for backend)
+- FastAPI, Uvicorn (for API)
+- Vite + React (for dashboard)
+
+---
+
+## 🚀 Quick Start
+
+1. Flash `UpdatedRFIDServo.ino` to ESP32  
+2. Run `app_api.py` using FastAPI  
+3. Start dashboard with:
+
+   ```bash
+   cd dashboard
+   npm install
+   npm run dev

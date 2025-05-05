@@ -19,12 +19,12 @@ A smart, modular IoT system for secure chemical warehouse management using **ESP
 
 | Folder/File           | Description                                      |
 |-----------------------|--------------------------------------------------|
-| `dashboard/`          | React front-end using Vite, for visualization   |
-| `ir_timeCode/`        | ESP32 + IR sensors for intrusion detection      |
-| `writeRFID.ino`       | Arduino sketch to write chemical data to RFID   |
-| `ProgrammableRFID.ino`| Checks if RFID tags are writeable               |
-| `UpdatedRFIDServo.ino`| Main logic: RFID → API → Servo/LED control      |
-| `app_api.py`          | Python backend API (FastAPI recommended)        |
+| `dashboard/`          | React FRONTEND using Vite, for visualization     |
+| `ir_timeCode/`        | ESP32 + IR sensors for intrusion detection       |
+| `writeRFID.ino`       | Arduino sketch to write chemical data to RFID    |
+| `ProgrammableRFID.ino`| Checks if RFID tags are writeable                |
+| `UpdatedRFIDServo.ino`| RFID → API → Servo/LED control                   |
+| `app_api.py`          | Python backend API for LLAMA                     |
 
 ---
 
